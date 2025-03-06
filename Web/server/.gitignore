@@ -10,3 +10,6 @@ yarn-error.log
 
 # Code coverage
 coverage
+
+# Ignore macOS system files
+.DS_Store
