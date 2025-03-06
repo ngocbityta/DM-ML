@@ -1,99 +1,67 @@
-const httpStatus = require('http-status');
-const tokenService = require('./token.service');
-const userService = require('./user.service');
-const Token = require('../models/token.model');
-const ApiError = require('../utils/ApiError');
-const { tokenTypes } = require('../config/tokens');
+const httpStatus = require("http-status");
+const Video = require("../models/video.model");
+const ApiError = require("../utils/ApiError");
 
 /**
- * Login with username and password
- * @param {string} email
- * @param {string} password
- * @returns {Promise<User>}
+ * Create a video
+ * @param {Object} videoData
+ * @returns {Promise<Video>}
  */
-const loginUserWithEmailAndPassword = async (email, password) => {
-  const user = await userService.getUserByEmail(email);
-  if (!user || !(await user.isPasswordMatch(password))) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
-  }
-  return user;
+const createVideo = async (videoData) => {
+  return await Video.create(videoData);
 };
 
 /**
- * Logout
- * @param {string} refreshToken
+ * Get video by ID
+ * @param {string} id
+ * @returns {Promise<Video>}
+ */
+const getVideoById = async (id) => {
+  const video = await Video.findById(id);
+  if (!video) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Video not found");
+  }
+  return video;
+};
+
+/**
+ * Get all videos
+ * @returns {Promise<Array<Video>>}
+ */
+const getAllVideos = async () => {
+  return await Video.find();
+};
+
+/**
+ * Update video by ID
+ * @param {string} id
+ * @param {Object} updateData
+ * @returns {Promise<Video>}
+ */
+const updateVideoById = async (id, updateData) => {
+  const video = await Video.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
+  if (!video) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Video not found");
+  }
+  return video;
+};
+
+/**
+ * Delete video by ID
+ * @param {string} id
  * @returns {Promise}
  */
-const logout = async (refreshToken) => {
-  const refreshTokenDoc = await Token.findOne({ token: refreshToken, type: tokenTypes.REFRESH, blacklisted: false });
-  if (!refreshTokenDoc) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Not found');
-  }
-  await refreshTokenDoc.remove();
-};
-
-/**
- * Refresh auth tokens
- * @param {string} refreshToken
- * @returns {Promise<Object>}
- */
-const refreshAuth = async (refreshToken) => {
-  try {
-    const refreshTokenDoc = await tokenService.verifyToken(refreshToken, tokenTypes.REFRESH);
-    const user = await userService.getUserById(refreshTokenDoc.user);
-    if (!user) {
-      throw new Error();
-    }
-    await refreshTokenDoc.remove();
-    return tokenService.generateAuthTokens(user);
-  } catch (error) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Please authenticate');
-  }
-};
-
-/**
- * Reset password
- * @param {string} resetPasswordToken
- * @param {string} newPassword
- * @returns {Promise}
- */
-const resetPassword = async (resetPasswordToken, newPassword) => {
-  try {
-    const resetPasswordTokenDoc = await tokenService.verifyToken(resetPasswordToken, tokenTypes.RESET_PASSWORD);
-    const user = await userService.getUserById(resetPasswordTokenDoc.user);
-    if (!user) {
-      throw new Error();
-    }
-    await userService.updateUserById(user.id, { password: newPassword });
-    await Token.deleteMany({ user: user.id, type: tokenTypes.RESET_PASSWORD });
-  } catch (error) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Password reset failed');
-  }
-};
-
-/**
- * Verify email
- * @param {string} verifyEmailToken
- * @returns {Promise}
- */
-const verifyEmail = async (verifyEmailToken) => {
-  try {
-    const verifyEmailTokenDoc = await tokenService.verifyToken(verifyEmailToken, tokenTypes.VERIFY_EMAIL);
-    const user = await userService.getUserById(verifyEmailTokenDoc.user);
-    if (!user) {
-      throw new Error();
-    }
-    await Token.deleteMany({ user: user.id, type: tokenTypes.VERIFY_EMAIL });
-    await userService.updateUserById(user.id, { isEmailVerified: true });
-  } catch (error) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Email verification failed');
+const deleteVideoById = async (id) => {
+  const video = await Video.findByIdAndDelete(id);
+  if (!video) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Video not found");
   }
 };
 
 module.exports = {
-  loginUserWithEmailAndPassword,
-  logout,
-  refreshAuth,
-  resetPassword,
-  verifyEmail,
+  createVideo,
+  getVideoById,
+  getAllVideos,
+  updateVideoById,
+  deleteVideoById,
 };

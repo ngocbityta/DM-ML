@@ -4,40 +4,38 @@ const { toJSON } = require("./plugins");
 const userVideoSchema = mongoose.Schema(
   {
     userId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
     videoId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Video",
       required: true,
     },
     watchCount: {
       type: Number,
-      required: true,
+      default: 0,
     },
     totalWatchTime: {
       type: Number,
-      required: true,
+      default: 0,
     },
     recentWatchTime: {
       type: Number,
-      required: true,
+      default: 0,
     },
     isLike: {
       type: Boolean,
-      required: true,
+      default: false,
     },
     isShare: {
       type: Boolean,
-      required: true,
+      default: false,
     },
     isCollection: {
       type: Boolean,
-      required: true,
-    },
-    content: {
-      type: String,
-      required: true,
+      default: false,
     },
   },
   {
@@ -46,7 +44,7 @@ const userVideoSchema = mongoose.Schema(
 );
 
 // add plugin that converts mongoose to json
-videoSchema.plugin(toJSON);
+userVideoSchema.plugin(toJSON);
 
 const UserVideo = mongoose.model("UserVideo", userVideoSchema);
 

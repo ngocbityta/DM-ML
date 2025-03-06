@@ -3,17 +3,31 @@ const { toJSON } = require("./plugins");
 
 const videoSchema = mongoose.Schema(
   {
-    like: {
-      type: Number,
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    description: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+    url: {
+      type: String,
       required: true,
     },
-    like: {
+    views: {
       type: Number,
-      required: true,
+      default: 0,
     },
-    collection: {
+    likes: {
       type: Number,
-      required: true,
+      default: 0,
+    },
+    collections: {
+      type: Number,
+      default: 0,
     },
   },
   {

@@ -4,11 +4,13 @@ const { toJSON } = require("./plugins");
 const commentSchema = mongoose.Schema(
   {
     userId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
     videoId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Video",
       required: true,
     },
     content: {
@@ -22,7 +24,7 @@ const commentSchema = mongoose.Schema(
 );
 
 // add plugin that converts mongoose to json
-videoSchema.plugin(toJSON);
+commentSchema.plugin(toJSON);
 
 const Comment = mongoose.model("Comment", commentSchema);
 
